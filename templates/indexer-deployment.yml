@@ -1,0 +1,497 @@
+
+---
+# innovi-core-metadata-indexer
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-metadata-indexer
+  labels:
+    app: innovi-core-metadata-indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-metadata-indexer
+  template:
+    metadata:
+      labels:
+        app: innovi-core-metadata-indexer
+    spec:
+      containers:
+      - name: innovi-core-metadata-indexer
+        # image: agentvi/innovi-core-indexer:build-dev-88
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviIndexers.image }}
+        resources:
+            requests:
+              memory: "0.5Gi"
+              cpu: 500m 
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        env:
+        
+        - name: MODE
+          value: metadata
+        - name: LOG_LEVEL
+          value: info
+        - name: CPU_FACTOR
+          value: "2"
+        - name: CONSUMER_THREADS
+          value: "1"
+        - name: BATCH_SIZE
+          value: "512"
+        - name: ES_JAVA_OPTS
+          value: "-Xms500m -Xmx500m"
+        - name: KAFKA_BROKERS
+          value: "kafka-headless.default.svc.cluster.local:9092"
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-events-indexer
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-events-indexer
+  labels:
+    app: innovi-core-events-indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-events-indexer
+  template:
+    metadata:
+      labels:
+        app: innovi-core-events-indexer
+    spec:
+      containers:
+      - name: innovi-core-events-indexer
+        # image: agentvi/innovi-core-indexer:build-dev-88
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviIndexers.image }}
+        resources:
+            requests:
+              memory: "1.0Gi"
+              cpu: 500m 
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        env:
+        
+        - name: MODE
+          value: event
+        - name: LOG_LEVEL
+          value: info
+        - name: CPU_FACTOR
+          value: "2"
+        - name: CONSUMER_THREADS
+          value: "1"
+        - name: BATCH_SIZE
+          value: "1"
+        - name: ES_JAVA_OPTS
+          value: "-Xms500m -Xmx500m"
+        - name: KAFKA_BROKERS
+          value: "kafka-headless.default.svc.cluster.local:9092"
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-health-events-indexer
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-health-events-indexer
+  labels:
+    app: innovi-core-health-events-indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-health-events-indexer
+  template:
+    metadata:
+      labels:
+        app: innovi-core-health-events-indexer
+    spec:
+      containers:
+      - name: innovi-core-health-events-indexer
+        # image: agentvi/innovi-core-indexer:build-dev-88
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviIndexers.image }}
+        resources:
+            requests:
+              memory: "1.0Gi"
+              cpu: 500m 
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        env:
+        
+        - name: MODE
+          value: health_event
+        - name: LOG_LEVEL
+          value: info
+        - name: CPU_FACTOR
+          value: "2"
+        - name: CONSUMER_THREADS
+          value: "1"
+        - name: BATCH_SIZE
+          value: "1"
+        - name: ES_JAVA_OPTS
+          value: "-Xms500m -Xmx500m"
+        - name: KAFKA_BROKERS
+          value: "kafka-headless.default.svc.cluster.local:9092"
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-sensor-status-indexer
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-sensor-status-indexer
+  labels:
+    app: innovi-core-sensor-status-indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-sensor-status-indexer
+  template:
+    metadata:
+      labels:
+        app: innovi-core-sensor-status-indexer
+    spec:
+      containers:
+      - name: innovi-core-sensor-status-indexer
+        # image: agentvi/innovi-core-indexer:build-dev-88
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviIndexers.image }}
+        resources:
+            requests:
+              memory: "0.5Gi"
+              cpu: 500m 
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        env:
+        
+        - name: MODE
+          value: sensor_status
+        - name: LOG_LEVEL
+          value: info
+        - name: CPU_FACTOR
+          value: "2"
+        - name: CONSUMER_THREADS
+          value: "1"
+        - name: BATCH_SIZE
+          value: "5"
+        - name: ES_JAVA_OPTS
+          value: "-Xms500m -Xmx500m"
+        - name: KAFKA_BROKERS
+          value: "kafka-headless.default.svc.cluster.local:9092"
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-agent-status-indexer
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-agent-status-indexer
+  labels:
+    app: innovi-core-agent-status-indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-agent-status-indexer
+  template:
+    metadata:
+      labels:
+        app: innovi-core-agent-status-indexer
+    spec:
+      containers:
+      - name: innovi-core-agent-status-indexer
+        # image: agentvi/innovi-core-indexer:build-dev-88
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviIndexers.image }}
+        resources:
+            requests:
+              memory: "0.5Gi"
+              cpu: 500m 
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        env:
+        
+        - name: MODE
+          value: agent_status
+        - name: LOG_LEVEL
+          value: info
+        - name: CPU_FACTOR
+          value: "2"
+        - name: CONSUMER_THREADS
+          value: "1"
+        - name: BATCH_SIZE
+          value: "5"
+        - name: ES_JAVA_OPTS
+          value: "-Xms500m -Xmx500m"
+        - name: KAFKA_BROKERS
+          value: "kafka-headless.default.svc.cluster.local:9092"
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-device-status-indexer
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-device-status-indexer
+  labels:
+    app: innovi-core-device-status-indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-device-status-indexer
+  template:
+    metadata:
+      labels:
+        app: innovi-core-device-status-indexer
+    spec:
+      containers:
+      - name: innovi-core-device-status-indexer
+        # image: agentvi/innovi-core-indexer:build-dev-88
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviIndexers.image }}
+        resources:
+            requests:
+              memory: "0.5Gi"
+              cpu: 500m 
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        env:
+        
+        - name: MODE
+          value: device_status
+        - name: LOG_LEVEL
+          value: info
+        - name: CPU_FACTOR
+          value: "2"
+        - name: CONSUMER_THREADS
+          value: "1"
+        - name: BATCH_SIZE
+          value: "5"
+        - name: ES_JAVA_OPTS
+          value: "-Xms500m -Xmx500m"
+        - name: KAFKA_BROKERS
+          value: "kafka-headless.default.svc.cluster.local:9092"
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-device-logs-indexer
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-device-logs-indexer
+  labels:
+    app: innovi-core-device-logs-indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-device-logs-indexer
+  template:
+    metadata:
+      labels:
+        app: innovi-core-device-logs-indexer
+    spec:
+      containers:
+      - name: innovi-core-device-logs-indexer
+        # image: agentvi/innovi-core-indexer:build-dev-88
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviIndexers.image }}
+        resources:
+            requests:
+              memory: "0.5Gi"
+              cpu: 500m 
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        env:
+        
+        - name: MODE
+          value: device_log
+        - name: LOG_LEVEL
+          value: info
+        - name: CPU_FACTOR
+          value: "2"
+        - name: CONSUMER_THREADS
+          value: "1"
+        - name: BATCH_SIZE
+          value: "5"
+        - name: ES_JAVA_OPTS
+          value: "-Xms500m -Xmx500m"
+        - name: KAFKA_BROKERS
+          value: "kafka-headless.default.svc.cluster.local:9092"
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-statistics-indexer
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-statistics-indexer
+  labels:
+    app: innovi-core-statistics-indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-statistics-indexer
+  template:
+    metadata:
+      labels:
+        app: innovi-core-statistics-indexer
+    spec:
+      containers:
+      - name: innovi-core-statistics-indexer
+        # image: agentvi/innovi-core-indexer:build-dev-88
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviIndexers.image }}
+        resources:
+            requests:
+              memory: "0.5Gi"
+              cpu: 500m 
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        env:
+        
+        - name: MODE
+          value: statistics
+        - name: LOG_LEVEL
+          value: info
+        - name: CPU_FACTOR
+          value: "2"
+        - name: CONSUMER_THREADS
+          value: "1"
+        - name: BATCH_SIZE
+          value: "2"
+        - name: ES_JAVA_OPTS
+          value: "-Xms500m -Xmx500m"
+        - name: KAFKA_BROKERS
+          value: "kafka-headless.default.svc.cluster.local:9092"
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# graphite-exporter
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphite-exporter
+  labels:
+    app: graphite-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graphite-exporter
+  template:
+    metadata:
+      labels:
+        app: graphite-exporter
+    spec:
+      containers:
+      - name: graphite-exporter
+        # image: prom/graphite-exporter
+        image: {{ .Values.global.innoviImageRegistry }}prom/graphite-exporter
+        args: [
+          "--graphite.mapping-config=/tmp/config-volume/graphite_mapping.conf"
+        ]
+        resources:
+            requests:
+              memory: "0.1Gi"
+              cpu: 100m 
+        volumeMounts:
+        - name: config-volume
+          mountPath: /tmp/config-volume
+      volumes:
+      - name: config-volume
+        configMap:
+          name: graphite-exporter-config
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# graphite-exporter config
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: graphite-exporter-config
+  namespace: default
+data:
+  graphite_mapping.conf: |
+    mappings:
+    - match: metadata.*
+      name: metadata
+      labels:
+        code: $1
+
+---
+# graphite-exporter service
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: graphite-exporter
+  labels:
+    app: graphite-exporter
+spec:
+  clusterIP: None
+  selector:
+    app: graphite-exporter
+  ports:
+    - port: 9108
+      name: port1
+    - port: 9109
+      name: port2-tcp
+      protocol: TCP
+    - port: 9109
+      name: port2-udp
+      protocol: UDP

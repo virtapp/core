@@ -1,0 +1,145 @@
+---
+# common (shared across services)
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: innovi-common-config
+  namespace: default
+data:
+  MESSAGING_URI: "redis://innovi-redis-svc:6379"
+  CONFIG_CACHE_URI: "redis://innovi-redis-svc:6379"
+  CONFIG_DS_URI: "postgresql://postgres:E3xj8Fwz84@innovi-db-postgresql-headless.default.svc.cluster.local:5432/innovi"
+  CROPS_CACHE_URI_PFX: "file:///innovi-data/crops"
+  CASES_CACHE_URI_PFX: "file:///innovi-data/cases"
+  STREAMING_URI: "kafka://kafka-headless.default.svc.cluster.local:9092"
+  ELASTICSEARCH_HOSTS: elasticsearch.default.svc.cluster.local:9200
+  KAFKA_BROKER_EP: "PLAINTEXT://kafka-0.kafka.default.svc.cluster.local:9093,PLAINTEXT://kafka-1.kafka.default.svc.cluster.local:9093,PLAINTEXT://kafka-2.kafka.default.svc.cluster.local:9093"
+  KAFKA_BROKERS: "kafka-headless.default.svc.cluster.local:9092"
+  STATUS_TOPIC: "sensor_status"
+  SENSOR_STATUS_TOPIC: "sensor_status"
+  DEVICE_STATUS_TOPIC: "device_status"
+  METADATA_TOPIC: "metadata"
+  EVENTS_TOPIC: "events"
+  METADATA_URI: "elastic://"
+  EVENT_URI_PFX: "file:///innovi-data/events"
+  REF_IMAGE_URI_PFX: "file:///innovi-data/ref-images"
+  SEARCH_CACHE_URI_PFX: "file:///innovi-data/search" 
+  DOCKER_USR: "agentvidockerdeploy"
+  DOCKER_PWD: "4gentVI%"
+  MAIL_RELAY_PWD: ""
+  MAIL_RELAY_TLS: "true"
+  MAIL_RELAY_URI: ""
+  MAIL_RELAY_USR: ""
+  PORTAL_URL: "https://portal.innovi.app"
+  OPERATION_DS_URI: elastic://elasticsearch.default.svc.cluster.local:9200
+  DB_PAGE_SIZE: "100"
+  LOG_MAX_SIZE: "100"
+  LOG_PART_MAX_SIZE: "100"
+  LOG_TO_FILE: "false"
+  HTTP_READ_TIMEOUT_MS: "3000"
+  HTTP_WRITE_TIMEOUT_MS: "3000"
+  AUTH_ENABLED: "true"
+  TOPIC_BY_SESSION: "true"
+  #USE_KAFKA: "false"
+---
+# innovi-core-api config
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: innovi-core-api-config
+  namespace: default
+data:
+  SERVER_PORT: "8080"
+  LOG_LEVEL: "INFO"
+  INIT_DB_ON_STARTUP: "true"
+  INIT_SYSADMIN_EMAIL: "admin@innovi.com"
+  INIT_SYSADMIN_PWD: "myStr0ngPwd"
+  SEARCH_SERVICE_URI: "http://innovi-core-search-service:8080"
+  SEARCH_CACHE_URI_PFX: "file:///innovi-data/search"
+
+            
+---
+# innovi-portal config
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: innovi-portal-config
+  namespace: default
+data:
+  SERVER_PORT: "8082"
+  INNOVI_API_URL: "http://innovi-core-api:8080"
+  INNOVI_API_KEY: "FH2a7B130KxdQ1HF6bpkMcam/gco0dxFUhNZGfE3jJV/k5Zy6b1MMuO4PGpIhBI/g3KlXw=="
+  GOOGLE_MAP_KEY: "AIzaSyBpw-HGGIxuIdEi4QBX_CI38iFm1mVxwF8"
+  WMS_LAYER1_URL: "OpenStreepMap|http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+  WMS_LAYER2_URL: "ESRI Street|https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+  WMS_LAYER3_URL: "ESRI Imagery|https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+
+---
+# innovi-console config
+#
+#apiVersion: v1
+#kind: ConfigMap
+#metadata:
+#  name: innovi-console-config
+#  namespace: default
+#data:
+#  SERVER_PORT: "8081"
+#  INNOVI_API_URL: "http://innovi-core-api:8080"
+#  INNOVI_API_KEY: "jeQduwgktL6Gbo/jmcEcSjv7Os2yPYtkIXGoQzLc9hFiOr0k7qfwB2Sb2EuA1R+sfktb3eA="
+
+---
+# innovi-core-health-service config
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: innovi-core-health-service-config
+  namespace: default
+data:
+  LOG_LEVEL: "INFO"
+
+---
+# innovi-core-event-service config
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: innovi-core-event-service-config
+  namespace: default
+data:
+  KAFKA_NUM_OF_PARTITIONS: "30"
+  GODEBUG: "cgocheck=0"
+  LOG_LEVEL: "INFO"
+
+---
+# innovi-core-agent-proxy config
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: innovi-core-agent-proxy-config
+  namespace: default
+data:
+  KAFKA_NUM_OF_PARTITIONS: "30"
+  LOG_LEVEL: "INFO"
+
+---
+# innovi-core-md-indexer config
+
+#apiVersion: v1
+#kind: ConfigMap
+#metadata:
+#  name: innovi-core-md-indexer
+#  namespace: default
+#data:
+#  LOG_LEVEL: INFO
+#  SUBSCRIBER: metadata_indexer
+#  KAFKA_GROUP: md-indexer
+#  STORE_INTERVAL: "500"
+#  READY_TIMEOUT: "2"
+#  OLD_INS_TIMEOUT: "10"
+  
+

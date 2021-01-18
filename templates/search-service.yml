@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: innovi-core-search-service
+  namespace: default
+  labels:
+    app: innovi-core-search-service
+spec:
+  selector:
+    app: innovi-core-search-service
+  ports:
+    - name: search-port
+      port: 8080
+      protocol: TCP
+      targetPort: search-port
+  
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-search-service
+  labels:
+    app: innovi-core-search-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: innovi-core-search-service
+  template:
+    metadata:
+      labels:
+        app: innovi-core-search-service
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: innovi-core-search-service
+                operator: In
+                values:
+                - innovi-core-search-service
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: innovi-core-search-service
+        # image: agentvi/innovi-search-service:build-dev-123
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviSearchService.image }}
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        env:
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: STORE_DESTINATION
+          value: "0"
+        - name: PGHOST
+          value: innovi-db-postgresql-headless.default.svc.cluster.local
+        - name: PGPORT
+          value: "5432"
+        - name: PGUSER
+          value: postgres 
+        - name: PGPASSWORD
+          value: E3xj8Fwz84
+        - name: PGDATABASE
+          value: innovi
+        - name: INDEX_PREFIX
+          value: metadata-
+        - name: ES_PAGE_SIZE
+          value: "5000"
+        - name: MAX_SUB_QUERIES
+          value: "40"
+        - name: MINUTES_PER_SUB_QUERY
+          value: "60"
+        - name: SENSORS_PER_SUB_QUERY
+          value: "20"
+        - name: SEARCH_SERVICE_URI
+          value: "http://innovi-core-search-service:8080"
+        - name: RESULTS_THREAD_COUNT
+          value: "4"
+          
+        ports:
+          - name: search-port
+            containerPort: 8080    
+        resources:
+          requests:
+            memory: "300Mi"
+            cpu: 800m          
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+       # cloud.google.com/gke-nodepool: search-pool

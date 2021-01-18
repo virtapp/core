@@ -1,0 +1,338 @@
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: innovi-data
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: longhorn-nfs
+  resources:
+    requests:
+      storage: 200Gi
+
+---
+# innovi-core-api
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-api
+  labels:
+    app: innovi-core-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "innovi-core-api"
+  template:
+    metadata:
+      labels:
+        app: innovi-core-api
+    spec:
+      containers:
+      - name: innovi-core-api
+        # image: agentvi/innovi-core-api:2.1.1412
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviCoreApi.image }}
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config
+        - configMapRef:
+            name: innovi-core-api-config
+        ports:
+          - name: api-port
+            containerPort: 8080
+        volumeMounts:
+          - mountPath: innovi-data/events
+            name: vol1
+            subPath: events
+          - mountPath: innovi-data/ref-images
+            name: vol1
+            subPath: ref-images
+          - mountPath: innovi-data/search
+            name: vol1
+            subPath: search
+          - mountPath: innovi-data/crops
+            name: vol1
+            subPath: crops
+          - mountPath: innovi-data/cases
+            name: vol1
+            subPath: cases
+      volumes:
+        - name: vol1
+          persistentVolumeClaim:
+            claimName: innovi-data
+        #emptyDir: {}
+      # volumes:
+      # - name: cloudsql-db-credentials
+      #   secret:
+      #     secretName: cloudsql-db-credentials
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #node-role.kubernetes.io/master: "true"
+
+
+---
+# innovi-core-agent-proxy
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-agent-proxy
+  labels:
+    app: innovi-core-agent-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-agent-proxy
+  template:
+    metadata:
+      labels:
+        app: innovi-core-agent-proxy
+    spec:
+      containers:
+      - name: innovi-core-agent-proxy
+        # image: agentvi/innovi-core-agent-proxy:2.1.270
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviCoreAgentProxy.image }}
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        - configMapRef:
+            name: innovi-core-agent-proxy-config
+        ports:
+          - name: proxy-port
+            containerPort: 8070
+        volumeMounts:
+          - mountPath: innovi-data/crops
+            name: vol1
+            subPath: crops
+          - mountPath: innovi-data/search
+            name: vol1
+            subPath: search
+          - mountPath: innovi-data/cases
+            name: vol1
+            subPath: cases
+      volumes:
+        - name: vol1
+          persistentVolumeClaim:
+            claimName: innovi-data
+     # volumes:
+     # - name: cloudsql-db-credentials
+     #  secret:
+     #     secretName: cloudsql-db-credentials
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-device-proxy
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-device-proxy
+  labels:
+    app: innovi-core-device-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-device-proxy
+  template:
+    metadata:
+      labels:
+        app: innovi-core-device-proxy
+    spec:
+      containers:
+      - name: innovi-core-device-proxy
+        # image: agentvi/innovi-core-device-proxy:2.1.79
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviCoreDeviceProxy.image }}
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config
+        - configMapRef:
+            name: innovi-core-api-config
+        env:
+        - name: CONFIG_DS_URI
+          value: "postgresql://postgres:E3xj8Fwz84@innovi-db-postgresql-headless.default.svc.cluster.local:5432/innovi"
+        - name: MESSAGING_URI
+          value: "redis://innovi-redis-svc:6379"
+        - name: KAFKA_BROKER_EP
+          value: "PLAINTEXT://kafka-0.kafka.default.svc.cluster.local:9093,PLAINTEXT://kafka-1.kafka.default.svc.cluster.local:9093,PLAINTEXT://kafka-2.kafka.default.svc.cluster.local:9093"
+        - name: STREAMING_URI
+          value: "kafka://kafka-headless.default.svc.cluster.local:9092"
+        - name: LOG_LEVEL
+          value: "debug"
+        - name: SERVER_PORT
+          value: "8083"
+        ports:
+          - name: proxy-port
+            containerPort: 8083
+        resources:
+            requests:
+              memory: "200Mi"
+              cpu: "500m"
+     # volumes:
+     # - name: cloudsql-db-credentials
+     #  secret:
+     #     secretName: cloudsql-db-credentials
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-health-service
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-health-service
+  labels:
+    app: innovi-core-health-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-health-service
+  template:
+    metadata:
+      labels:
+        app: innovi-core-health-service
+    spec:
+      containers:
+      - name: innovi-core-health-service
+        # image: agentvi/innovi-core-health-service:2.1.404
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviCoreHealthService.image }}
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config        
+        - configMapRef:
+            name: innovi-core-health-service-config
+     # volumes:
+     # - name: cloudsql-db-credentials
+     #   secret:
+     #     secretName: cloudsql-db-credentials
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+
+---
+# innovi-core-event-service
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-core-event-service
+  labels:
+    app: innovi-core-event-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-core-event-service
+  template:
+    metadata:
+      labels:
+        app: innovi-core-event-service
+    spec:
+      containers:
+      - name: innovi-core-event-service
+        # image:  agentvi/innovi-core-event-service:2.1.157
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviCoreEventService.image }}
+        resources:
+            requests:
+              memory: "1Gi"
+              cpu: 1
+        envFrom:
+        - configMapRef:
+            name: innovi-common-config
+        - configMapRef:
+            name: innovi-core-event-service-config
+        volumeMounts:
+          - mountPath: innovi-data/events
+            name: vol1
+            subPath: events
+      volumes:
+        - name: vol1
+          persistentVolumeClaim:
+            claimName: innovi-data
+     # volumes:
+     # - name: cloudsql-db-credentials
+     #   secret:
+     #    secretName: cloudsql-db-credentials
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+       # node-role.kubernetes.io/master: "true"
+        
+
+---
+# innovi-portal
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovi-portal
+  labels:
+    app: innovi-portal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: innovi-portal
+  template:
+    metadata:
+      labels:
+        app: innovi-portal
+    spec:
+      containers:
+      - name: innovi-portal
+        # image: agentvi/innovi-portal:2.1.rc-1932
+        image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviPortal.image }}
+        envFrom: 
+        - configMapRef:
+            name: innovi-portal-config
+        ports:
+          - name: portal-port
+            containerPort: 8082
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      nodeSelector: {}
+        #cloud.google.com/gke-nodepool: default-pool
+
+---
+# innovi-core-tasks - background maintenance tasks (run every day at 12:00 UTC)
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: innovi-core-tasks
+spec:
+  schedule: "0 12 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: innovi-core-tasks
+            # image: agentvi/innovi-core-tasks:latest
+            image: {{ .Values.global.innoviImageRegistry }}{{ .Values.innoviCoreTasks.image }}
+            envFrom:
+            - configMapRef:
+                name: innovi-common-config     
+          restartPolicy: OnFailure
+          imagePullSecrets:
+            - name: regcred
+          nodeSelector: {}
+            #cloud.google.com/gke-nodepool: default-pool                      

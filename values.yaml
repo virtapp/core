@@ -1,0 +1,27 @@
+# Default values for innovi-core.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+global:
+  #imageRegistry: "registry.innovi.app:5000/"
+  innoviImageRegistry: ""
+
+innoviCoreApi:
+  image: "agentvi/innovi-core-api:2.1.1676"
+innoviCoreAgentProxy:
+  image: "agentvi/innovi-core-agent-proxy:2.1.273" 
+innoviCoreDeviceProxy:
+  image: "agentvi/innovi-core-device-proxy:2.1.79" 
+innoviCoreHealthService:
+  image: "agentvi/innovi-core-health-service:2.1.404"
+innoviCoreEventService:
+  image: "agentvi/innovi-core-event-service:2.1.157"
+innoviPortal:
+  image: "agentvi/innovi-portal:2.1.rc-1932"
+innoviCoreTasks:
+  image: "agentvi/innovi-core-tasks:latest"
+innoviIndexers:
+  image: "agentvi/innovi-core-indexer:build-dev-95"
+innoviSearchService:
+  image: "agentvi/innovi-search-service:build-dev-123"

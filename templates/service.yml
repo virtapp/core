@@ -1,0 +1,131 @@
+---
+# innovi-core-api backend config (to support web-sockets)
+---
+#apiVersion: cloud.google.com/v1beta1
+#kind: BackendConfig
+#metadata:
+#  name: innovi-core-api-backendconfig
+#spec:
+#  timeoutSec: 180
+#  connectionDraining:
+#    drainingTimeoutSec: 180
+#  sessionAffinity:
+#      affinityType: "CLIENT_IP"
+
+---
+# innovi-core-api service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: innovi-core-api
+  namespace: default
+  labels:
+    app: "innovi-core-api"
+  annotations: {}
+    #cloud.google.com/neg: '{"ingress": true}'
+    #beta.cloud.google.com/backend-config: '{"ports": {"8080":"innovi-core-api-backendconfig"}}'
+spec:
+  selector:
+    app: "innovi-core-api"
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  type: NodePort
+
+---
+# innovi-core-agent-proxy backend config (to support web-sockets)
+---
+#apiVersion: cloud.google.com/v1beta1
+#kind: BackendConfig
+#metadata:
+#  name: innovi-core-agent-proxy-backendconfig
+#spec:
+#  timeoutSec: 180
+# connectionDraining:
+#   drainingTimeoutSec: 180
+# sessionAffinity:
+#      affinityType: "CLIENT_IP"
+
+---
+
+# innovi-core-agent-proxy service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: innovi-core-agent-proxy
+  namespace: default
+  labels:
+    app: innovi-core-agent-proxy
+  annotations: {}
+    #cloud.google.com/neg: '{"ingress": true}'
+    #beta.cloud.google.com/backend-config: '{"ports": {"8070":"innovi-core-agent-proxy-backendconfig"}}'
+spec:
+  selector:
+    app: innovi-core-agent-proxy
+  ports:
+    - port: 8070
+      protocol: TCP
+      targetPort: 8070
+  type: NodePort
+
+
+# innovi-core-device-proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: innovi-core-device-proxy
+  namespace: default
+  labels:
+    app: innovi-core-device-proxy
+  annotations: {}
+    #cloud.google.com/neg: '{"ingress": true}'
+    #beta.cloud.google.com/backend-config: '{"ports": {"8070":"innovi-core-agent-proxy-backendconfig"}}'
+spec:
+  selector:
+    app: innovi-core-device-proxy
+  ports:
+    - port: 8083
+      protocol: TCP
+      targetPort: 8083
+  type: NodePort
+---
+
+
+# innovi-portal backend config (to support web-sockets)
+#---
+#apiVersion: cloud.google.com/v1beta1
+#kind: BackendConfig
+#metadata:
+#  name: innovi-portal-backendconfig
+#spec:
+#  timeoutSec: 180
+#  connectionDraining:
+#    drainingTimeoutSec: 180
+#  sessionAffinity:
+#      affinityType: "CLIENT_IP"
+
+---
+# innovi-portal service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: innovi-portal
+  namespace: default
+  labels:
+    app: "innovi-portal"
+  annotations: {}
+    #cloud.google.com/neg: '{"ingress": true}'
+    #beta.cloud.google.com/backend-config: '{"ports": {"8082":"innovi-portal-backendconfig"}}'
+spec:
+  selector:
+    app: "innovi-portal"
+  ports:
+    - port: 8082
+      protocol: TCP
+      targetPort: 8082
+  type: NodePort
